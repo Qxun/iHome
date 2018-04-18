@@ -4,7 +4,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from iHome import constants
-from . import db
+from iHome import db
 
 
 class BaseModel(object):
