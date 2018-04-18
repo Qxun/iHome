@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8fe23732-ba1f-4301-817f-4440ac75e042" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/iHome/api_1_0/verify.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/iHome/api_1_0/__init__.py" afterPath="$PROJECT_DIR$/iHome/api_1_0/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/iHome/static/html/register.html" afterPath="$PROJECT_DIR$/iHome/static/html/register.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,8 +32,8 @@
       <file leaf-file-name="register.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/iHome/static/html/register.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="23" column="24" lean-forward="false" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
+            <state relative-caret-position="347">
+              <caret line="29" column="22" lean-forward="false" selection-start-line="29" selection-start-column="22" selection-end-line="29" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -386,7 +383,14 @@
       <option name="project" value="LOCAL" />
       <updated>1524020507565</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="继承验证码模块&amp;生成验证码">
+      <created>1524023005523</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1524023005523</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TodoView">
@@ -433,7 +437,8 @@
     <MESSAGE value="抽离" />
     <MESSAGE value="加载静态页面" />
     <MESSAGE value="拷贝模型类到项目&amp;数据库迁移生成表" />
-    <option name="LAST_COMMIT_MESSAGE" value="拷贝模型类到项目&amp;数据库迁移生成表" />
+    <MESSAGE value="继承验证码模块&amp;生成验证码" />
+    <option name="LAST_COMMIT_MESSAGE" value="继承验证码模块&amp;生成验证码" />
   </component>
   <component name="WindowStateProjectService">
     <state width="202" height="85" key="Git.Branch.Popup" />
@@ -618,8 +623,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/iHome/static/html/register.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="23" column="24" lean-forward="false" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
+        <state relative-caret-position="347">
+          <caret line="29" column="22" lean-forward="false" selection-start-line="29" selection-start-column="22" selection-end-line="29" selection-end-column="22" />
           <folding />
         </state>
       </provider>
