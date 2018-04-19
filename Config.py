@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import redis
 
 
@@ -26,13 +27,14 @@ class Config(object):
 class DevelopmentConfig(Config):
     """开发阶段的配置类"""
     DEBUG = True
+    LOG_LEVEL = logging.DEBUG
 
 
 class ProductionConfig(Config):
     """生成阶段的配置类"""
     # 配置mysql数据库连接
     SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@127.0.0.1:3306/flask_ihome'
-
+    LOG_LEVEL = logging.WARNING
 
 config_dict = {
     'developmentconfig': DevelopmentConfig,
