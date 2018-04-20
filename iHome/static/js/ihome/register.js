@@ -56,11 +56,31 @@ function sendSMSCode() {
             'X-CSRFToken': getCookie('csrf_token')
         },
         'success': function (resp) {
+            if (resp.errno == 0) {
+                // 发送成功
+                // 倒计时60
+                var num = 60;
+                var tid = setInterval(function () {
+                    if (num <= 0) {
+                        //倒计时完成，清除定时器
+                        clearInterval(tid)
+                        $('.phonecode-a').text('获取验证码');
+                        $('.phonecode-a').attr('onclick', "sendSMSCode();");
+                    }
+                    else {
+                        $('.phonecode-a').text(num + '秒');
+                    }
+                    num -= 1;
+                }, 1000)
 
+            } else {
+                //发送失败
+                $('#password2-err span').html(resp.errsmg);
+                $('#password2-err').show();
+                $('.phonecode-a').attr('onclick', 'sendSMSCode();')
+            }
         }
-        
     })
-
 }
 
 $(document).ready(function () {
@@ -83,4 +103,6 @@ $(document).ready(function () {
     });
 
     // TODO: 注册的提交(判断参数是否为空)
+
+
 })

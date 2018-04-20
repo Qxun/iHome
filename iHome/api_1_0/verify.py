@@ -70,7 +70,7 @@ def send_sms_code():
         return jsonify(errno=RET.DBERR, errmsg='保存验证码失败')
 
     # 7. TODO：发送短信验证码
-
+    
 
     # 8. 返回信息，发送验证码成功
     return jsonify(errno=RET.OK, errmsg='发送短信成功')
