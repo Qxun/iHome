@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import random
 import re
+from string import lower
+
 from flask import request, abort, jsonify, make_response, current_app
 import json
 from iHome import redis_store, constants
@@ -8,10 +10,12 @@ from iHome.models import User
 from iHome.response_code import RET
 from . import api
 from iHome.utils.captcha.captcha import captcha
-from iHome.utils.sms import CCP
 
 
-@api.route('/sms_code',methods=['POST'])
+# from iHome.utils.sms import CCP
+
+
+@api.route('/sms_code', methods=['POST'])
 def send_sms_code():
     """
     #发送短信验证码
@@ -31,9 +35,8 @@ def send_sms_code():
     mobile = req_dict.get('mobile')
     image_code = req_dict.get('image_code')
     image_code_id = req_dict.get('image_code_id')
-
     # 2. 验证参数完整和校验
-    if not all([mobile,image_code,image_code_id]):
+    if not all([mobile, image_code, image_code_id]):
         return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
 
     if not re.match(r"1[3456789]\d{9}", mobile):
@@ -44,7 +47,7 @@ def send_sms_code():
 
     # 3. 从redis中获取图片验证码，（取不到，验证码过期）
     try:
-        real_image_id = redis_store.get('imagecode:%s'%image_code_id)
+        real_image_id = redis_store.get('imagecode:%s' % image_code_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='查询图片验证码错误')
@@ -52,19 +55,19 @@ def send_sms_code():
         return jsonify(errno=RET.NODATA, errmsg='图片验证码已过期')
 
     # 4. 对比图片验证码
-    if real_image_id != image_code:
+    if lower(real_image_id) != lower(image_code):
         return jsonify(errno=RET.DATAERR, errmsg='图片验证码错误')
 
-    # # 5. 生成短信验证码
-    # sms_code = '%06d' % random.randint(0, 999999)
-    # current_app.logger.info('短信验证码：' + sms_code)
-    #
-    # # 6. 保存redis短信验证码，
-    # try:
-    #     redis_store.set('sms_code:%s' % mobile, sms_code, constants.SMS_CODE_REDIS_EXPIRES)
-    # except Exception as e:
-    #     current_app.logger.error(e)
-    #     return jsonify(errno=RET.DBERR, errmsg='保存验证码失败')
+    # 5. 生成短信验证码
+    sms_code = '%06d' % random.randint(0, 999999)
+    current_app.logger.info('短信验证码：' + sms_code)
+
+    # 6. 保存redis短信验证码，
+    try:
+        redis_store.set('sms_code:%s' % mobile, sms_code, constants.SMS_CODE_REDIS_EXPIRES)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存验证码失败')
 
     # 7. TODO：发送短信验证码
 
@@ -91,7 +94,8 @@ def get_image_code():
     name, text, data = captcha.generate_captcha()
     # 3.在redis中存储图片验证码
     try:
-        redis_store.set('imagecode:%s' %uuid, text, constants.IMAGE_CODE_REDIS_EXPIRES)
+        redis_store.set('imagecode:%s' % uuid, text, constants.IMAGE_CODE_REDIS_EXPIRES)
+        current_app.logger.info('图片验证码:'+text)
     except Exception as e:
         # 生成日志并保存
         current_app.logger.error(e)
