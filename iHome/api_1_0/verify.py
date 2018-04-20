@@ -67,7 +67,7 @@ def send_sms_code():
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='保存验证码失败')
 
-    # 7. TODO：发送短信验证码
+    # 7. 发送短信验证码
     res = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES/60],1)
 
     if res != 1:
