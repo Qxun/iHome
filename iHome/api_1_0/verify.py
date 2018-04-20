@@ -10,9 +10,7 @@ from iHome.models import User
 from iHome.response_code import RET
 from . import api
 from iHome.utils.captcha.captcha import captcha
-
-
-# from iHome.utils.sms import CCP
+from iHome.utils.sms import CCP
 
 
 @api.route('/sms_code', methods=['POST'])
@@ -70,7 +68,10 @@ def send_sms_code():
         return jsonify(errno=RET.DBERR, errmsg='保存验证码失败')
 
     # 7. TODO：发送短信验证码
-    
+    res = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES/60],1)
+
+    if res != 1:
+        return jsonify(errno=RET.THIRDERR, errsmg='发送短信失败')
 
     # 8. 返回信息，发送验证码成功
     return jsonify(errno=RET.OK, errmsg='发送短信成功')
