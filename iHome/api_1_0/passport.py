@@ -68,7 +68,6 @@ def register():
     mobile = req_dict.get('mobile')
     phonecode = req_dict.get('phonecode')
     password = req_dict.get('password')
-    print req_dict
 
     if not all([mobile, phonecode, password]):
         return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
@@ -81,6 +80,15 @@ def register():
     # 3. 对比短信验证码
     if sms_code != phonecode:
         return jsonify(errno=RET.DATAERR, errmsg='短信验证码错误')
+
+    # 验证手机号是否已经注册
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    if user:
+        return jsonify(errno=RET.DATAERR, errmsg='手机已注册')
 
     # 4. 创建用户，并保存用户信息
     user = User()

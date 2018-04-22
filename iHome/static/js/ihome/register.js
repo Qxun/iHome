@@ -75,7 +75,7 @@ function sendSMSCode() {
 
             } else {
                 //发送失败
-                $('#password2-err span').html(resp.errsmg);
+                $('#password2-err span').html(resp.errmsg);
                 $('#password2-err').show();
                 $('.phonecode-a').attr('onclick', 'sendSMSCode();')
             }
