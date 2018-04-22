@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, current_app, make_response
+from flask import Blueprint, current_app, make_response, session
 
 # 创建蓝图
 from flask_wtf.csrf import generate_csrf
@@ -19,7 +19,8 @@ def send_html_file(file_name):
         file_name = 'html/' + file_name
     # file_name = 'html' + file_name
     response = make_response(current_app.send_static_file(file_name))
-    response.set_cookie('csrf_token', generate_csrf())
+    csrf_token = generate_csrf()
+    response.set_cookie('csrf_token', csrf_token)
     return response
 
 

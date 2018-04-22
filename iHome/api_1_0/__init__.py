@@ -5,4 +5,4 @@ api = Blueprint('api_1_0', __name__)
 
 # from index import hello_world
 # from verify import get_image_code, send_sms_code
-from . import verify, password
+from . import verify, passport

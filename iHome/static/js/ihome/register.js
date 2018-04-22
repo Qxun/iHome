@@ -149,7 +149,7 @@ $(document).ready(function () {
             'success': function (resp) {
                 if (resp.errno == '0'){
                     // 注册成功
-                    location.herf = 'index.html'
+                    location.href = 'index.html'
                 }
                 else {
                     alert(resp.errmsg);
