@@ -1,0 +1,85 @@
+# -*- coding: utf-8 -*-
+from flask import session, current_app, jsonify, request, g
+
+from iHome import db, constants
+from iHome.utils.commons import login_required
+from iHome.models import User
+from iHome.response_code import RET
+from iHome.utils.image_storage import image_storage
+from . import api
+
+
+@api.route('/user/avatar', methods=['POST'])
+@login_required
+def set_user_avatar():
+    """
+    上传头像到七牛云
+    1、获取上传图片文件
+    2、上传图片到七牛云
+    3、设置用户的头像记录
+    4、返回应答
+    :return: 
+    """
+    # 1、获取上传图片文件
+    file = request.files.get('avatar')
+
+    if not file:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+    # 2、上传图片到七牛云
+    try:
+        key = image_storage(file.read())
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg='上传头像失败')
+
+    # 3、设置用户的头像记录
+    user_id = g.user_id
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+
+    user.avatar_url = key
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存头像记录失败')
+
+    # 4、返回应答
+    avatar_url = constants.QINIU_DOMIN_PREFIX + key
+    return jsonify(errno=RET.OK, errmsg='上传头像成功', data={'avatar_url': avatar_url})
+
+
+@api.route('/user')
+@login_required
+def get_user_info():
+    """
+    获取个人信息
+    0. 判断是否登录
+    1. 获取当前登录用户id
+    2. 根据用户id获取用户信息
+    3. 返回应答
+    :return: 
+    """
+    # 1. 获取当前登录用户id
+    user_id = session.get('user_id')
+
+    # 2. 根据用户id获取用户信息
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+    # 3. 返回应答
+
+    return jsonify(errno=RET.OK, errmsg='OK', data=user.to_dict())

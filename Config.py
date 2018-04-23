@@ -12,7 +12,7 @@ class Config(object):
     # 关闭追踪数据库的修改
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # 配置redis地址
-    REDIS_HOST = '172.16.59.141'
+    REDIS_HOST = '172.16.59.142'
     REDIS_PORT = 6379
     # session配置
     SESSION_TYPE = 'redis'
