@@ -9,6 +9,54 @@ from iHome.utils.image_storage import image_storage
 from . import api
 
 
+@api.route('/user/name', methods=['PUT'])
+@login_required
+def set_user_name():
+    """
+    设置用户名
+    1、接收用户名并进行校验
+    2、设置用户用户名
+    3、返回应答
+    """
+    # 1、接收用户名并进行校验
+    req_dict = request.json
+    username = req_dict.get('username')
+
+    if not username:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+    # 2、设置用户用户名
+    user_id = g.user_id
+    try:
+        user = User.query.filter(User.name == username, User.id != user_id).first()
+    except Exception as e:
+        user = None
+        current_app.logger.error(e)
+
+    if user:
+        return jsonify(errno=RET.DATAERR, errmsg='用户名已存在')
+
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+
+    user.name = username
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='设置用户名失败')
+
+    # 3、返回应答
+    return jsonify(errno=RET.OK, errmsg='设置用户名成功')
+
+
 @api.route('/user/avatar', methods=['POST'])
 @login_required
 def set_user_avatar():
