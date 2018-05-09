@@ -8,6 +8,22 @@ from iHome.response_code import RET
 from iHome.utils.image_storage import image_storage
 from . import api
 
+@api.route('/user/auth', methods=['GET'])
+@login_required
+def get_user_auth():
+    # 获取登录用户的信息
+    user_id = g.user_id
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+    # 组织响应
+    return jsonify(errno=RET.OK, errmsg='OK', data=user.auth_to_dict())
+
 
 @api.route('/user/auth', methods=['POST'])
 @login_required
