@@ -7,6 +7,15 @@ from iHome.models import User
 from iHome.response_code import RET
 from . import api
 
+@api.route('/session', methods=['DELETE'])
+def logout():
+    """
+    退出登录
+    :return: 
+    """
+    session.clear()
+    return jsonify(errno=RET.OK, errmsg='退出登录成功')
+
 
 @api.route('/session',methods=['POST'])
 def login():

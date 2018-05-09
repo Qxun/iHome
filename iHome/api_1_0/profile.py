@@ -9,6 +9,43 @@ from iHome.utils.image_storage import image_storage
 from . import api
 
 
+@api.route('/user/auth', methods=['POST'])
+@login_required
+def auth():
+    # 获取用户信息并验证
+    json_dict = request.json
+    real_name = json_dict.get('real_name')
+    id_card = json_dict.get('id_card')
+    if not all([real_name, id_card]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+    #第三方验证
+    # 设置用户实名认证信息
+    user_id = g.user_id
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.errno(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+
+    if user.real_name and user.id_card:
+        return jsonify(errno=RET.DATAERR,errmsg='已经实名认证')
+
+    user.real_name = real_name
+    user.id_card = id_card
+    # 保存数据库
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据存储失败')
+
+    return jsonify(errno=RET.OK, errmsg='实名认证成功')
+
+
 @api.route('/user/name', methods=['PUT'])
 @login_required
 def set_user_name():
