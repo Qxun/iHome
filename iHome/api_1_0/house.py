@@ -3,9 +3,10 @@ from iHome.utils.image_storage import image_storage
 from . import api
 from iHome.models import Area, House, Facility, HouseImage
 from iHome.response_code import RET
-from flask import current_app, jsonify, request, g
+from flask import current_app, jsonify, request, g, session
 from iHome import db, constants
 from iHome.utils.commons import login_required
+
 
 @api.route('/house/<int:house_id>')
 def get_house_info(house_id):
@@ -26,7 +27,9 @@ def get_house_info(house_id):
     if not house:
         return jsonify(errno=RET.NODATA, errmsg='房屋不存在')
     # 2.组织数据返回响应
-    return jsonify(errno=RET.OK, errmsg='OK', data=house.to_full_dict())
+    user_id = session.get('user_id', -1)
+
+    return jsonify(errno=RET.OK, errmsg='OK', data={'house':house.to_full_dict(), 'user_id': user_id})
 
 
 @api.route('/houses/image', methods=['POST'])

@@ -20,7 +20,7 @@ $(document).ready(function(){
     // TODO: 获取该房屋的详细信息
     $.get('/api/v1.0/house/'+ houseId, function (resp) {
        if (resp.errno == '0'){
-            var html = template('house-image-tmpl', {'img_urls': resp.data.img_urls,'price': resp.data.price});
+            var html = template('house-image-tmpl', {'img_urls': resp.data.house.img_urls,'price': resp.data.house.price});
             $('.swiper-container').html(html);
 
            // TODO: 数据加载完毕后,需要设置幻灯片对象，开启幻灯片滚动
@@ -32,8 +32,12 @@ $(document).ready(function(){
                paginationType: 'fraction'
            });
            // 设置房屋详细信息
-           html = template('house-detail-tmpl', {'house': resp.data});
-           $('.detail-con').html(html)
+           html = template('house-detail-tmpl', {'house': resp.data.house});
+           $('.detail-con').html(html);
+           if (resp.data.house.user_id != resp.data.user_id){
+                $('.book-house').show();
+                $(".book-house").attr("href", "/booking.html?hid=" + resp.data.house.hid);
+           }
        }
        else {
            alert(resp.errmsg)
