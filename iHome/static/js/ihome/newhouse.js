@@ -31,7 +31,7 @@ $(document).ready(function(){
             house_params[x.name] = x.value
         });
         var facility = [];
-        $(':checkbox[name=facility]').each(function (index, item) {
+        $(':checked[name=facility]').each(function (index, item) {
             facility[index] = item.value
         });
         house_params['facility'] = facility;

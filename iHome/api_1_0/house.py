@@ -7,6 +7,27 @@ from flask import current_app, jsonify, request, g
 from iHome import db, constants
 from iHome.utils.commons import login_required
 
+@api.route('/house/<int:house_id>')
+def get_house_info(house_id):
+    """
+    获取房屋详细信息
+    1. 根据房屋id 获取房屋信息
+    2. 组织数据返回响应
+    :param house_id: 
+    :return: 
+    # """
+    # 1.根据房屋id 获取房屋信息
+    try:
+        house = House.query.get(house_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询数据库失败')
+
+    if not house:
+        return jsonify(errno=RET.NODATA, errmsg='房屋不存在')
+    # 2.组织数据返回响应
+    return jsonify(errno=RET.OK, errmsg='OK', data=house.to_full_dict())
+
 
 @api.route('/houses/image', methods=['POST'])
 @login_required
@@ -57,7 +78,6 @@ def save_house_image():
 @api.route('/houses', methods=['POST'])
 @login_required
 def save_new_house():
-    print 123
     req_dict = request.json
     title = req_dict.get('title')
     price = req_dict.get('price')
