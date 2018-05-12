@@ -4,7 +4,6 @@
     <list default="true" id="8fe23732-ba1f-4301-817f-4440ac75e042" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/iHome/api_1_0/house.py" afterPath="$PROJECT_DIR$/iHome/api_1_0/house.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/iHome/static/js/ihome/newhouse.js" afterPath="$PROJECT_DIR$/iHome/static/js/ihome/newhouse.js" />
     </list>
     <ignored path="logs/log[*]" />
     <ignored path="logs/log" />
@@ -129,8 +128,8 @@
       <file leaf-file-name="house.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/iHome/api_1_0/house.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="382">
-              <caret line="47" column="41" lean-forward="true" selection-start-line="47" selection-start-column="41" selection-end-line="47" selection-end-column="41" />
+            <state relative-caret-position="395">
+              <caret line="42" column="35" lean-forward="false" selection-start-line="42" selection-start-column="35" selection-end-line="42" selection-end-column="35" />
               <folding>
                 <element signature="e#24#75#0" expanded="true" />
               </folding>
@@ -770,7 +769,14 @@
       <option name="project" value="LOCAL" />
       <updated>1526094158498</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="上传房屋图片">
+      <created>1526110138225</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1526110138226</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -858,7 +864,8 @@
     <MESSAGE value="用户实名认证代码实现" />
     <MESSAGE value="查询用户实名认证信息前后端代码实现" />
     <MESSAGE value="发布房屋基本信息" />
-    <option name="LAST_COMMIT_MESSAGE" value="发布房屋基本信息" />
+    <MESSAGE value="上传房屋图片" />
+    <option name="LAST_COMMIT_MESSAGE" value="上传房屋图片" />
   </component>
   <component name="WindowStateProjectService">
     <state width="202" height="85" key="Git.Branch.Popup" />
@@ -1315,8 +1322,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/iHome/api_1_0/house.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="382">
-          <caret line="47" column="41" lean-forward="true" selection-start-line="47" selection-start-column="41" selection-end-line="47" selection-end-column="41" />
+        <state relative-caret-position="395">
+          <caret line="42" column="35" lean-forward="false" selection-start-line="42" selection-start-column="35" selection-end-line="42" selection-end-column="35" />
           <folding>
             <element signature="e#24#75#0" expanded="true" />
           </folding>
