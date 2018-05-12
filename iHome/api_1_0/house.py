@@ -1,10 +1,54 @@
 # -*- coding: utf-8 -*-
+from iHome.utils.image_storage import image_storage
 from . import api
-from iHome.models import Area, House, Facility
+from iHome.models import Area, House, Facility, HouseImage
 from iHome.response_code import RET
-from flask import current_app, jsonify,request,g
-from iHome import db
+from flask import current_app, jsonify, request, g
+from iHome import db, constants
 from iHome.utils.commons import login_required
+
+
+@api.route('/houses/image', methods=['POST'])
+@login_required
+def save_house_image():
+    house_id = request.form.get('house_id')
+    if not house_id:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    file = request.files.get('house_image')
+
+    if not file:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少图片')
+
+    try:
+        house = House.query.get(house_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询房屋信息失败')
+
+    if not house:
+        return jsonify(errno=RET.NODATA, errmsg='房屋不存在')
+
+    try:
+        key = image_storage(file.read())
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg='上传房屋图片失败')
+
+    house_image = HouseImage()
+    house_image.house_id = house_id
+    house_image.url = key
+
+    try:
+        db.session.add(house_image)
+        db.session.commit()
+    except Exception as e:
+        db.session.callback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存房屋图片失败')
+
+    image_url = constants.QINIU_DOMIN_PREFIX + key
+    return jsonify(errno=RET.OK, errmsg='OK', data={'img_url': image_url})
 
 
 @api.route('/houses', methods=['POST'])
@@ -21,11 +65,12 @@ def save_new_house():
     unit = req_dict.get('unit')
     capacity = req_dict.get('capacity')
     beds = req_dict.get('beds')
-    deposit = req_dict.get('deposit') # 房屋押金
+    deposit = req_dict.get('deposit')  # 房屋押金
     min_days = req_dict.get('min_days')
     max_days = req_dict.get('max_days')
 
-    if not all([title, price, address, area_id, room_count, acreage, unit, capacity, beds, deposit, min_days, max_days]):
+    if not all(
+            [title, price, address, area_id, room_count, acreage, unit, capacity, beds, deposit, min_days, max_days]):
         return jsonify(errno=RET.PARAMERR, errmsg='参数缺失')
 
     try:
@@ -66,10 +111,11 @@ def save_new_house():
         db.session.add(house)
         db.session.commit()
     except Exception as e:
+        db.session.rollback()
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='保存房屋信息失败')
 
-    return jsonify(errno=RET.OK, errmsg='ok')
+    return jsonify(errno=RET.OK, errmsg='ok', data={'house_id': house.id})
 
 
 @api.route('/areas')
