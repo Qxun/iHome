@@ -85,22 +85,32 @@ $(document).ready(function(){
             pagination: '.swiper-pagination',
             paginationClickable: true
         });
-       }
-       else {
+        }
+        else {
            alert(rsp.errmsg)
-       }
+        }
     });
 
 
     // TODO: 获取城区信息,获取完毕之后需要设置城区按钮点击之后相关操作
-
-    // TODO: 城区按钮点击之后相关操作
-    $(".area-list a").click(function(e){
-        $("#area-btn").html($(this).html());
-        $(".search-btn").attr("area-id", $(this).attr("area-id"));
-        $(".search-btn").attr("area-name", $(this).html());
-        $("#area-modal").modal("hide");
+    $.get('/api/v1.0/areas', function (resp) {
+        if (resp.errno == '0'){
+            var html = template('area-list-tmpl', {'areas': resp.data})
+            $('.area-list').html(html)
+            // TODO: 城区按钮点击之后相关操作
+            $(".area-list a").click(function(e){
+                $("#area-btn").html($(this).html());
+                $(".search-btn").attr("area-id", $(this).attr("area-id"));
+                $(".search-btn").attr("area-name", $(this).html());
+                $("#area-modal").modal("hide");
+            });
+        }
+        else {
+            alert(resp.errmsg)
+        }
     });
+
+
 
     $('.modal').on('show.bs.modal', centerModals);      //当模态框出现的时候
     $(window).on('resize', centerModals);               //当窗口大小变化的时候

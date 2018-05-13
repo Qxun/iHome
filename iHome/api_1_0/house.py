@@ -4,8 +4,9 @@ from . import api
 from iHome.models import Area, House, Facility, HouseImage
 from iHome.response_code import RET
 from flask import current_app, jsonify, request, g, session
-from iHome import db, constants
+from iHome import db, constants, redis_store
 from iHome.utils.commons import login_required
+import json
 
 
 @api.route('/houses/index')
@@ -166,6 +167,14 @@ def get_area():
     2.组织响应，返回数据
     :return: 
     """
+    try:
+        areas_json_str = redis_store.get('areas')
+        if areas_json_str:
+            areas_dict_li = json.loads(areas_json_str)
+            return jsonify(errno=RET.OK, errmsg='OK', data=areas_dict_li)
+    except Exception as e:
+        current_app.logger.error(e)
+
     # 1.获取城区信息
     try:
         areas = Area.query.all()
@@ -176,5 +185,10 @@ def get_area():
     areas_dict_list = []
     for area in areas:
         areas_dict_list.append(area.to_dict())
+
+    try:
+        redis_store.set('areas', json.dumps(areas_dict_list), constants.AREA_INFO_REDIS_EXPIRES)
+    except Exception as e:
+        current_app.logger.error(e)
 
     return jsonify(errno=RET.OK, errmsg='OK', data=areas_dict_list)
