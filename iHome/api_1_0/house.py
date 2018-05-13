@@ -8,6 +8,21 @@ from iHome import db, constants
 from iHome.utils.commons import login_required
 
 
+@api.route('/houses/index')
+def get_house_index():
+    try:
+        houses = House.query.order_by(House.create_time.desc()).limit(5).all()
+    except Exception as e :
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='获取房屋信息失败')
+
+    houses_dict_li = []
+    for house in houses:
+        houses_dict_li.append(house.to_basic_dict())
+
+    return jsonify(errno=RET.OK, errmsg='OK', data=houses_dict_li)
+
+
 @api.route('/house/<int:house_id>')
 def get_house_info(house_id):
     """
