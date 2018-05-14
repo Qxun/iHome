@@ -123,6 +123,16 @@ def get_house_list():
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
 
     try:
+        key = 'house:%s:%s:%s:%s' % (area_id, sd, ed, sort_key)
+        res_json_str = redis_store.hget(key,page)
+        if res_json_str:
+            resp = json.loads(res_json_str)
+            return jsonify(errno=RET.OK, errmsg='OK', data=resp)
+    except Exception as e:
+        current_app.logger.error(e)
+
+
+    try:
         houses_query = House.query
         if area_id:
             houses_query = houses_query.filter(House.area_id==area_id)
@@ -166,7 +176,19 @@ def get_house_list():
     houses_dict_li = []
     for house in houses:
         houses_dict_li.append(house.to_basic_dict())
-    return jsonify(errno=RET.OK, errmsg='OK', data={'houses':houses_dict_li, 'total_page': total_page})
+
+    resp = {'houses':houses_dict_li, 'total_page': total_page}
+    try:
+        key = 'house:%s:%s:%s:%s' % (area_id, sd, ed, sort_key)
+        pipeline = redis_store.pipeline()
+        pipeline.multi()
+        pipeline.hset(key, page, json.dumps(resp))
+        pipeline.expire(key, constants.HOUSE_LIST_REDIS_EXPIRES)
+        pipeline.execute()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    return jsonify(errno=RET.OK, errmsg='OK', data=resp)
 
 
 @api.route('/houses', methods=['POST'])
