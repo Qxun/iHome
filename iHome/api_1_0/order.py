@@ -17,12 +17,24 @@ def get_order_list():
     1. 根据用户的id查询出用户的所有订单的信息，按照订单的创建时间进行排序
     2. 组织数据，返回应答
     """
+    # role=lodger, 代表以房客的身份查询预订其他人房屋的订单
+    # role=landlord, 代表以房东的身份查询其他人预订自己房屋的订单
+    role = request.args.get('role')
+    if role not in ['lodger', 'landlord']:
+        return jsonify(errno=RET.PARAMERR, errmsg='数据错误')
+
     user_id = g.user_id
+
     try:
-        orders = Order.query.filter(Order.user_id == user_id).order_by(Order.create_time.desc()).all()
+        if role == 'lodger':
+            orders = Order.query.filter(Order.user_id == user_id).order_by(Order.create_time.desc()).all()
+        else:
+            houses = House.query.filter(House.user_id == user_id).all()
+            houses_li_id = [house.id for house in houses]
+            orders = Order.query.filter(Order.house_id.in_(houses_li_id)).order_by(Order.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR, errmsg='查询订单失败')
+        return jsonify(errno=RET.DBERR, errmsg='查询订单信息失败')
 
     order_dict_li = []
     for order in orders:
