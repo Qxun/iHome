@@ -45,6 +45,27 @@ function updateHouseData(action) {
         p:next_page
     };
     // TODO: 获取房屋列表信息
+    $.get('/api/v1.0/houses', params, function (resp) {
+        house_data_querying = false;
+        if(resp.errno == '0'){
+            total_page = resp.data.total_page;
+
+            var html = template('house-list-tmpl', {'houses': resp.data.houses});
+            // $('.house-list').html(html)
+            if (action =='renew'){
+                // 清空页面内容
+                $('.house-list').html(html)
+            }
+            else {
+                //追加方式获取
+                $(".house-list").append(html);
+                cur_page += 1;
+            }
+        }
+        else {
+            alert(resp.errmsg)
+        }
+    });
 }
 
 $(document).ready(function(){
