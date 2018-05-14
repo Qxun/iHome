@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 from iHome.utils.image_storage import image_storage
 from . import api
-from iHome.models import Area, House, Facility, HouseImage
+from iHome.models import Area, House, Facility, HouseImage, Order
 from iHome.response_code import RET
 from flask import current_app, jsonify, request, g, session
 from iHome import db, constants, redis_store
@@ -99,11 +101,23 @@ def get_house_list():
     area_id = request.args.get('aid')
     sort_key = request.args.get('sk', 'new')
     page = request.args.get('p')
+    sd = request.args.get('sd')
+    ed = request.args.get('ed')
+
+    start_date = None
+    end_date = None
 
     try:
         if area_id:
             area_id = int(area_id)
         page = int(page)
+        if sd:
+            start_date = datetime.strptime(sd, '%Y-%m-%d')
+        if ed:
+            end_date = datetime.strptime(ed, '%Y-%m-%d')
+        if start_date and end_date:
+            assert start_date < end_date, Exception('起始时间大于结束时间')
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
@@ -112,6 +126,23 @@ def get_house_list():
         houses_query = House.query
         if area_id:
             houses_query = houses_query.filter(House.area_id==area_id)
+
+        try:
+            conflict_orders_li = []
+            if start_date and end_date:
+                conflict_orders_li = Order.query.filter(end_date>Order.begin_date, start_date<Order.end_date).all()
+            elif start_date:
+                conflict_orders_li = Order.query.filter(start_date<Order.end_date).all()
+            elif end_date:
+                conflict_orders_li = Order.query.filter(end_date>Order.begin_date).all()
+
+            if conflict_orders_li:
+                conflict_orders_id = [order.house_id for order in conflict_orders_li]
+                houses_query = houses_query.filter(House.id.notin_(conflict_orders_id))
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='查询冲突订单失败')
+
         if sort_key == 'booking':
             houses_query = houses_query.order_by(House.order_count.desc())
         elif sort_key == 'price-inc':
