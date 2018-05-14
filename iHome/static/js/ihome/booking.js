@@ -93,7 +93,10 @@ $(document).ready(function(){
             },
             'success': function (resp) {
                 if (resp.errno == '0'){
-                    location.href = 'lorders.html';
+                    location.href = 'orders.html';
+                }
+                else if (resp.errno == '4101'){
+                    location.href = 'login.html'
                 }
                 else{
                     alert(resp.errmsg)

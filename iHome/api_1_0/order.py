@@ -9,6 +9,28 @@ from . import api
 from iHome.utils.commons import login_required
 
 
+@api.route('/orders')
+@login_required
+def get_order_list():
+    """
+    获取用户的订单信息:
+    1. 根据用户的id查询出用户的所有订单的信息，按照订单的创建时间进行排序
+    2. 组织数据，返回应答
+    """
+    user_id = g.user_id
+    try:
+        orders = Order.query.filter(Order.user_id == user_id).order_by(Order.create_time.desc()).all()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询订单失败')
+
+    order_dict_li = []
+    for order in orders:
+        order_dict_li.append(order.to_dict())
+
+    return jsonify(errno=RET.OK, errmsg='OK', data=order_dict_li)
+
+
 @api.route('/orders', methods=['POST'])
 @login_required
 def save_order_info():
