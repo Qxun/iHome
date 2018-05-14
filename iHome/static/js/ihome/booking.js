@@ -47,7 +47,7 @@ $(document).ready(function(){
         } else {
             var sd = new Date(startDate);
             var ed = new Date(endDate);
-            days = (ed - sd)/(1000*3600*24) + 1;
+            days = (ed - sd)/(1000*3600*24);
             var price = $(".house-text>p>span").html();
             var amount = days * parseFloat(price);
             $(".order-amount>span").html(amount.toFixed(2) + "(共"+ days +"晚)");
@@ -66,7 +66,42 @@ $(document).ready(function(){
         else {
             alert(resp.errmsg)
         }
-    })
+    });
 
     // TODO: 订单提交
-})
+    $('.submit-btn').click(function (e) {
+        var start_date = $("#start-date").val();
+        var end_date = $("#end-date").val();
+
+        if (!(start_date&&end_date)){
+            alert('请选择入住时间');
+            return;
+        }
+        var params = {
+            'house_id': houseId,
+            'start_date': start_date,
+            'end_date': end_date
+        };
+
+        $.ajax({
+            'url':'/api/v1.0/orders',
+            'type': 'post',
+            'data': JSON.stringify(params),
+            'contentType': 'application/json',
+            'headers':{
+                'X-CSRFToken': getCookie('csrf_token')
+            },
+            'success': function (resp) {
+                if (resp.errno == '0'){
+                    location.href = 'lorders.html';
+                }
+                else{
+                    alert(resp.errmsg)
+                }
+            }
+        })
+
+
+    })
+
+});
