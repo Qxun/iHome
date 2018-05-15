@@ -11,11 +11,33 @@ from iHome.utils.commons import login_required
 import json
 
 
+@api.route('/users/houses')
+@login_required
+def get_user_house():
+    """
+    获取用户发布的房屋信息:
+    1. 根据登录id查询用户的所有房屋信息
+    2. 组织数据，返回应答
+    """
+    user_id = g.user_id
+    try:
+        houses = House.query.filter(House.user_id == user_id).all()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询房屋信息失败')
+
+    house_dict_li = []
+    for house in houses:
+        house_dict_li.append(house.to_basic_dict())
+
+    return jsonify(errno=RET.OK, errmsg='OK', data=house_dict_li)
+
+
 @api.route('/houses/index')
 def get_house_index():
     try:
         houses = House.query.order_by(House.create_time.desc()).limit(constants.HOME_PAGE_DATA_REDIS_EXPIRES).all()
-    except Exception as e :
+    except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='获取房屋信息失败')
 
@@ -47,7 +69,7 @@ def get_house_info(house_id):
     # 2.组织数据返回响应
     user_id = session.get('user_id', -1)
 
-    return jsonify(errno=RET.OK, errmsg='OK', data={'house':house.to_full_dict(), 'user_id': user_id})
+    return jsonify(errno=RET.OK, errmsg='OK', data={'house': house.to_full_dict(), 'user_id': user_id})
 
 
 @api.route('/houses/image', methods=['POST'])
@@ -124,27 +146,26 @@ def get_house_list():
 
     try:
         key = 'house:%s:%s:%s:%s' % (area_id, sd, ed, sort_key)
-        res_json_str = redis_store.hget(key,page)
+        res_json_str = redis_store.hget(key, page)
         if res_json_str:
             resp = json.loads(res_json_str)
             return jsonify(errno=RET.OK, errmsg='OK', data=resp)
     except Exception as e:
         current_app.logger.error(e)
 
-
     try:
         houses_query = House.query
         if area_id:
-            houses_query = houses_query.filter(House.area_id==area_id)
+            houses_query = houses_query.filter(House.area_id == area_id)
 
         try:
             conflict_orders_li = []
             if start_date and end_date:
-                conflict_orders_li = Order.query.filter(end_date>Order.begin_date, start_date<Order.end_date).all()
+                conflict_orders_li = Order.query.filter(end_date > Order.begin_date, start_date < Order.end_date).all()
             elif start_date:
-                conflict_orders_li = Order.query.filter(start_date<Order.end_date).all()
+                conflict_orders_li = Order.query.filter(start_date < Order.end_date).all()
             elif end_date:
-                conflict_orders_li = Order.query.filter(end_date>Order.begin_date).all()
+                conflict_orders_li = Order.query.filter(end_date > Order.begin_date).all()
 
             if conflict_orders_li:
                 conflict_orders_id = [order.house_id for order in conflict_orders_li]
@@ -162,7 +183,7 @@ def get_house_list():
         else:
             houses_query = houses_query.order_by(House.create_time.desc())
 
-        #分页操作
+        # 分页操作
         house_paginate = houses_query.paginate(page, constants.HOUSE_LIST_PAGE_CAPACITY, False)
         # 获取当前页的结果列表
         houses = house_paginate.items
@@ -177,7 +198,7 @@ def get_house_list():
     for house in houses:
         houses_dict_li.append(house.to_basic_dict())
 
-    resp = {'houses':houses_dict_li, 'total_page': total_page}
+    resp = {'houses': houses_dict_li, 'total_page': total_page}
     try:
         key = 'house:%s:%s:%s:%s' % (area_id, sd, ed, sort_key)
         pipeline = redis_store.pipeline()
