@@ -9,6 +9,104 @@ from . import api
 from iHome.utils.commons import login_required
 
 
+@api.route('/orders/<int:order_id>/comment', methods=['PUT'])
+@login_required
+def save_order_comment(order_id):
+    """
+    保存评价信息
+    # 1.接收评论参数并进行校验
+    # 2.根据订单id查询订单信息
+    # 3.更改订单状态，保存评价信息
+    # 4.提交数据库
+    # 5.返回应答
+    :return: 
+    """
+    # 1.接收评论参数并进行校验
+    req_dict = request.json
+    comment = req_dict.get('comment')
+    if not comment:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    # 2.根据订单id查询订单信息
+    try:
+        order = Order.query.filter(Order.id == order_id,
+                               Order.status == 'WAIT_COMMENT',
+                               Order.user_id == g.user_id).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询订单失败')
+
+    if not order:
+        return jsonify(errno=RET.NODATA, errmsg='订单不存在')
+
+    # 3.更改订单状态，保存评价信息
+    order.status = 'COMPLETE'
+    order.comment = comment
+    # 4.提交数据库
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存订单信息失败')
+    # 5.返回应答
+    return jsonify(errno=RET.OK, errmsg='OK')
+
+@api.route('/orders/<int:order_id>/status', methods=['PUT'])
+@login_required
+def update_order_status(order_id):
+    """
+    # /orders/<int:order_id>/status?action=accept|reject
+    进行接单或拒单
+    1.接收数据action进行校验，action=accept（接单），action=reject（拒单）
+    2.根据订单id查询订单信息
+    3.根基action设置订单状态
+    4.更新数据库
+    5.返回应答
+    :param order_id: 
+    :return: 
+    """
+    # 1.接收数据action进行校验，action = accept（接单），action = reject（拒单）
+    action = request.args.get('action')
+    if action not in ['accept', 'reject']:
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+    # 2.根据订单id查询订单信息
+    try:
+        order = Order.query.filter(Order.id == order_id,
+                                   Order.status == 'WAIT_ACCEPT').first()
+        # 获取房东id
+        landlord_id = order.house.user_id
+        # 判断当前登录的用户是否是房东
+        if landlord_id != g.user_id:
+            return jsonify(errno=RET.DATAERR, errmsg='不是房东')
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询订单失败')
+
+    if not order:
+        return jsonify(errno=RET.DATAERR, errmsg='订单不存在')
+    # 3.根基action设置订单状态
+    if action == 'accept':
+        order.status = 'WAIT_COMMENT' # 待评价
+    else:
+        req_dict = request.json
+        reason = req_dict.get('reason')
+        if not reason:
+            return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+        order.comment = reason
+        order.status = 'REJECTED'
+    # 4.更新数据库
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存订单信息失败')
+
+    # 5.返回应答
+    return jsonify(errno=RET.OK, errmsg='OK')
+
+
 @api.route('/orders')
 @login_required
 def get_order_list():

@@ -62,7 +62,7 @@ $(document).ready(function(){
     // $(".top-bar>.register-login").show();
     $.get('/api/v1.0/session', function (resp) {
         if (resp.data.username && resp.data.user_id) {
-            $(".top-bar>.user-info").html(resp.data.username);
+            $(".top-bar>.user-info>.user-name").html(resp.data.username);
             $(".top-bar>.user-info").show();
             $(".top-bar>.register-login").hide();
         }
